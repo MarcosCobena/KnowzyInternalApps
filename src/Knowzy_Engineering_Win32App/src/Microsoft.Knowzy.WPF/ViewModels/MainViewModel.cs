@@ -12,15 +12,15 @@
 
 // ******************************************************************
 
-using System.Collections.Generic;
 using Caliburn.Micro;
+using Microsoft.Knowzy.Authentication;
 using Microsoft.Knowzy.Common.Contracts;
 using Microsoft.Knowzy.WPF.Messages;
 using Microsoft.Knowzy.WPF.ViewModels.Models;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
-using Microsoft.Knowzy.Authentication;
 
 namespace Microsoft.Knowzy.WPF.ViewModels
 {
@@ -67,6 +67,18 @@ namespace Microsoft.Knowzy.WPF.ViewModels
 
         public bool HasLoggedUser => !string.IsNullOrWhiteSpace(_authenticationService.UserLogged);
 
+        private bool _showAdaptiveCard;
+
+        public bool ShowAdaptiveCard
+        {
+            get => _showAdaptiveCard;
+            set
+            {
+                _showAdaptiveCard = value;
+                NotifyOfPropertyChange(() => ShowAdaptiveCard);
+            }
+        }
+
         protected override void OnViewAttached(object view, object context)
         {
             foreach (var item in _dataProvider.GetData())
@@ -96,6 +108,9 @@ namespace Microsoft.Knowzy.WPF.ViewModels
 
             if (item.Id == null) return;
             DevelopmentItems.Add(item);
+
+            // This prop. is just used to fire a visibility change in the UI, it should be improved in a real scenario
+            ShowAdaptiveCard = true;
         }
 
         public void Login()
@@ -123,6 +138,16 @@ namespace Microsoft.Knowzy.WPF.ViewModels
         {
             var products = DevelopmentItems?.Select(item => item.Product).ToArray();
             _dataProvider.SetData(products);
+        }
+
+        public void UpdateNotes(string notes)
+        {
+            var lastItem = DevelopmentItems.LastOrDefault();
+
+            if (lastItem != null)
+            {
+                lastItem.Notes = notes;
+            }
         }
     }
 }
